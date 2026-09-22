@@ -8,7 +8,9 @@ It turns “Will this go viral?” into a practical editing loop: **analyze → 
 
 **The score is a heuristic content assessment, not a probability of going viral.** There is no trained virality model, live trend feed, or connected audience analytics. Optional AI adds semantic feedback; it does not make reach predictable.
 
-[Source code](https://github.com/harshh-2505/Viralify) · [Methodology](docs/methodology.md) · [API reference](docs/api.md)
+[Live app](https://viralify-gamma.vercel.app) · [Source code](https://github.com/harshh-2505/Viralify) · [Methodology](docs/methodology.md) · [API reference](docs/api.md)
+
+The live app is hosted on Vercel and automatically deploys updates to `main`. It currently runs without an AI API key: text heuristics and real media inspection work immediately, with reports kept in your browser. Hosted uploads are limited to 4 MB per file.
 
 ## What the project does
 
