@@ -424,79 +424,48 @@ export function EmptyInsights() {
   return (
     <aside className="insights-card">
       <div className="insights-heading">
-        <span className="round-icon">
-          <Sparkles size={19} />
-        </span>
-        <span>From idea to impact</span>
-        <span className="tiny-stars">✧</span>
+        <span>THE READOUT</span>
+        <span className="tiny-stars">06 / SIGNALS</span>
       </div>
-      <div className="empty-gauge">
-        <svg viewBox="0 0 200 114" aria-hidden="true">
-          <path
-            d="M24 98a76 76 0 0 1 152 0"
-            fill="none"
-            stroke="#e6ece6"
-            strokeWidth="13"
-            strokeLinecap="round"
-          />
-          <path
-            d="M24 98a76 76 0 0 1 98-73"
-            fill="none"
-            stroke="#b8cdb6"
-            strokeWidth="13"
-            strokeLinecap="round"
-            strokeDasharray="5 9"
-          />
-          <path
-            d="M122 25a76 76 0 0 1 54 73"
-            fill="none"
-            stroke="#36775b"
-            strokeWidth="13"
-            strokeLinecap="round"
-            strokeDasharray="5 9"
-          />
-        </svg>
-        <div>
-          <Sparkles size={26} />
-          <span>Your next breakthrough?</span>
-        </div>
+      <div className="readout-art" aria-hidden="true">
+        <span className="readout-orbit orbit-a" />
+        <span className="readout-orbit orbit-b" />
+        <span className="readout-orbit orbit-c" />
+        <span className="readout-center">?</span>
+        <span className="readout-index">V / 01</span>
       </div>
       <h3>
-        A fresh perspective.
+        Your work, under
         <br />
-        Before you hit publish.
+        a new lens.
       </h3>
-      <p>Understand what’s landing, what’s missing, and what to try next.</p>
+      <p>Once you analyze a draft, the readout gives you practical edits and a plan to test.</p>
       <div className="insight-benefits">
         <div>
           <Target size={18} />
           <span>
-            <strong>Understand your potential</strong>
-            <small>Six signals. One clear assessment.</small>
+            <strong>01 / Decode the message</strong>
+            <small>Hook, clarity, details, action, and fit.</small>
           </span>
         </div>
         <div>
           <WandSparkles size={18} />
           <span>
-            <strong>Make every word work harder</strong>
-            <small>Specific feedback you can act on.</small>
+            <strong>02 / Find the better edit</strong>
+            <small>Specific improvements you can try.</small>
           </span>
         </div>
         <div>
           <Clock3 size={18} />
           <span>
-            <strong>Find your moment</strong>
+            <strong>03 / Plan the experiment</strong>
             <small>Publishing windows worth testing.</small>
           </span>
         </div>
       </div>
       <div className="insight-footnote">
         <Lightbulb size={16} />
-        <p>
-          Virality isn’t a promise.
-          <br />
-          Better content is a practice.
-        </p>
+        <p>A readiness score is an editorial signal, not a forecast of reach.</p>
         <ArrowRight size={16} />
       </div>
     </aside>

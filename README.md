@@ -1,6 +1,8 @@
 # Viralify
 
-**Understand your content. Improve your next draft. Find a publishing window worth testing.**
+**Make it worth the scroll.** Understand your content, improve your next draft, and find a publishing window worth testing.
+
+**[Open Viralify on Vercel →](https://viralify-gamma.vercel.app/)**
 
 Viralify reviews **text, images, audio, and video before publishing**. Give it a draft or upload, choose a platform and audience, and it explains which content signals are strong, what needs work, and what to try next.
 
@@ -8,7 +10,7 @@ It turns “Will this go viral?” into a practical editing loop: **analyze → 
 
 **The score is a heuristic content assessment, not a probability of going viral.** There is no trained virality model, live trend feed, or connected audience analytics. Optional AI adds semantic feedback; it does not make reach predictable.
 
-[Live app](https://viralify-gamma.vercel.app) · [Source code](https://github.com/harshh-2505/Viralify) · [Methodology](docs/methodology.md) · [API reference](docs/api.md)
+[Source code](https://github.com/harshh-2505/Viralify) · [Methodology](docs/methodology.md) · [API reference](docs/api.md)
 
 The live app is hosted on Vercel and automatically deploys updates to `main`. It currently runs without an AI API key: text heuristics and real media inspection work immediately, with reports kept in your browser. Hosted uploads are limited to 4 MB per file.
 

@@ -90,7 +90,7 @@ function readPreferences(): Preferences {
   }
 }
 const navItems = [
-  { id: "analyzer" as const, label: "Content analyzer", Icon: Sparkles },
+  { id: "analyzer" as const, label: "Viralify", Icon: Sparkles },
   { id: "library" as const, label: "Content library", Icon: LibraryIcon },
   { id: "planner" as const, label: "Publishing planner", Icon: CalendarDays },
   { id: "learn" as const, label: "Learning loop", Icon: BarChart3 },
@@ -426,7 +426,7 @@ export default function App() {
           aria-label="Viralify home"
         >
           <Logo />
-          <span>
+          <span className="brand-wordmark">
             viralify<span className="brand-period">.</span>
           </span>
         </button>
@@ -435,22 +435,24 @@ export default function App() {
             <Layers3 size={17} />
           </span>
           <span>
-            <strong>Creator workspace</strong>
-            <small>Your space to grow</small>
+            <strong>Studio / 01</strong>
+            <small>Your content desk</small>
           </span>
           <ChevronDown size={14} />
         </div>
-        <span className="nav-label">WORKSPACE</span>
+        <span className="nav-label">THE WORKFLOW</span>
         <nav aria-label="Main navigation">
           {navItems.map(({ id, label, Icon }) => (
             <button
               key={id}
               onClick={() => navigate(id)}
-              className={`nav-item ${page === id ? "active" : ""}`}
+              className={`nav-item ${id === "analyzer" ? "analyzer-nav" : ""} ${page === id ? "active" : ""}`}
               aria-current={page === id ? "page" : undefined}
             >
               <Icon size={18} />
-              <span>{label}</span>
+              <span className={id === "analyzer" ? "nav-wordmark" : undefined}>
+                {label}
+              </span>
               {id === "library" && records.length > 0 && (
                 <span className="nav-count">{records.length}</span>
               )}
@@ -460,18 +462,13 @@ export default function App() {
         </nav>
         <div className="sidebar-grow" />
         <div className="sidebar-note">
-          <span className="note-sparkles">✳</span>
-          <h4>Your ideas have potential.</h4>
-          <p>
-            Let’s help them find
-            <br />
-            their people.
-          </p>
+          <span className="note-sparkles">FIELD NOTE / 001</span>
+          <h4>Make something people stop for.</h4>
+          <p>Good content starts with a point of view. Sharpen yours here.</p>
           <button onClick={() => setGuideOpen(true)}>
-            A quick look around
+            Explore the method
             <ArrowUpRight size={15} />
           </button>
-          <span className="note-orbit" />
         </div>
         <div className="sidebar-bottom">
           <button className="nav-item" onClick={() => setSettingsOpen(true)}>
@@ -507,7 +504,9 @@ export default function App() {
             </button>
             <span className="breadcrumb-root">Workspace</span>
             <ChevronRight size={13} />
-            <span>{pageTitle}</span>
+            <span className={page === "analyzer" ? "topbar-wordmark" : undefined}>
+              {pageTitle}
+            </span>
           </div>
           <div>
             <button
@@ -558,16 +557,13 @@ export default function App() {
             <>
               <div className="page-title">
                 <div>
-                  <div className="eyebrow">
-                    A LITTLE INSIGHT. A LOT MORE POSSIBILITY.
-                  </div>
+                  <div className="eyebrow">THE CREATIVE INTELLIGENCE DESK / 001</div>
                   <h1>
-                    Make your next post count
+                    Make it worth <em>the scroll</em>
                     <span className="title-dot">.</span>
                   </h1>
                   <p>
-                    Bring your idea. Find your edge. Create with a little more
-                    confidence.
+                    A sharper second opinion for the content you’re about to publish.
                   </p>
                 </div>
                 <button
@@ -582,60 +578,26 @@ export default function App() {
                 <div className="hero-copy">
                   <span className="hero-kicker">
                     <span />
-                    GOOD IDEAS DESERVE TO BE SEEN
+                    THE IDEA IS ONLY THE BEGINNING
                   </span>
                   <h2>
-                    You create the content.
+                    Find the signal.
                     <br />
-                    We help it go further.
+                    Cut through the noise.
                   </h2>
-                  <p>Turn your next “what if” into something worth sharing.</p>
+                  <p>See what works, what gets lost, and what to change before you hit publish.</p>
                   <button onClick={useExample} disabled={busy}>
-                    Try an example
+                    Explore with a sample
                     <ArrowUpRight size={16} />
                   </button>
                 </div>
                 <div className="hero-art" aria-hidden="true">
-                  <div className="art-orbit orbit-one" />
-                  <div className="art-orbit orbit-two" />
-                  <span className="art-spark spark-one">✳</span>
-                  <span className="art-spark spark-two">✧</span>
-                  <div className="floating-label">
-                    <span className="label-dot" />
-                    Made for your next big idea
-                  </div>
-                  <div className="art-card card-back">
-                    <div className="mini-card-top">
-                      <span className="mini-avatar" />
-                      <span className="mini-line" />
-                    </div>
-                    <div className="abstract-photo">
-                      <div className="photo-sun" />
-                      <div className="photo-hill hill-one" />
-                      <div className="photo-hill hill-two" />
-                      <div className="photo-grain" />
-                    </div>
-                    <span className="mini-line bottom-line" />
-                  </div>
-                  <div className="art-card card-front">
-                    <span className="mini-eyebrow">A LITTLE MOMENTUM</span>
-                    <div className="art-chart">
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                      <span />
-                    </div>
-                    <div className="mini-card-footer">
-                      <span>Something good is growing.</span>
-                      <TrendingUp size={17} />
-                    </div>
-                  </div>
-                  <div className="floating-spark">
-                    <Sparkles size={21} />
-                  </div>
+                  <div className="signal-rings"><span /><span /><span /><span /></div>
+                  <div className="signal-core">V<span>///</span></div>
+                  <div className="signal-coordinate coordinate-top">40° 42′ N &nbsp; / &nbsp; CREATIVE FREQUENCY</div>
+                  <div className="signal-coordinate coordinate-bottom">INPUT → INSIGHT → IMPACT</div>
+                  <div className="signal-crosshair crosshair-a">+</div>
+                  <div className="signal-crosshair crosshair-b">+</div>
                 </div>
               </section>
               <div className="analyzer-layout">
@@ -646,10 +608,10 @@ export default function App() {
                 >
                   <div className="section-heading">
                     <div>
-                      <h2>What are you working on?</h2>
-                      <p>Give your content a fresh pair of eyes.</p>
+                      <h2>Start with the draft.</h2>
+                      <p>Drop in the work. We’ll help you see it differently.</p>
                     </div>
-                    <span className="step-label">01 / CREATE</span>
+                    <span className="step-label">01 / INPUT</span>
                   </div>
                   <div
                     className="content-type-tabs"
