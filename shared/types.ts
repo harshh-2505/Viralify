@@ -87,6 +87,7 @@ export interface AnalysisRecord {
 }
 export interface Capabilities {
   aiEnabled: boolean;
+  aiAccessRequired?: boolean;
   mediaEnabled: boolean;
   maxUploadMb: number;
   model: string | null;

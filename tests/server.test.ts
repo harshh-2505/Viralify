@@ -73,10 +73,14 @@ async function post(
   url: string,
   input: unknown = example,
   file?: Parameters<typeof form>[1],
+  aiAccessCode?: string,
 ) {
   return fetch(`${url}/api/analyze`, {
     method: "POST",
     body: form(input, file),
+    headers: aiAccessCode
+      ? { "X-Viralify-AI-Access": aiAccessCode }
+      : undefined,
   });
 }
 async function patch(url: string, id: string, body: unknown) {
@@ -454,6 +458,59 @@ test("AI provider failures fall back to usable local feedback without exposing s
     );
   } finally {
     await instance.close();
+  }
+});
+
+test("public AI calls require both server secrets and a matching access code", async () => {
+  let providerCalls = 0;
+  const code = "a-long-private-test-access-code-with-entropy";
+  const instance = await fixture({
+    stateless: true,
+    openaiApiKey: "test-only",
+    aiAccessCode: code,
+    fetcher: async () => {
+      providerCalls++;
+      throw new Error("simulated provider failure");
+    },
+  });
+  try {
+    const health = await (await fetch(`${instance.url}/api/health`)).json();
+    assert.equal(health.aiEnabled, true);
+    assert.equal(health.aiAccessRequired, true);
+    assert.equal((await post(instance.url)).status, 201);
+    assert.equal(providerCalls, 0);
+    assert.equal(
+      (await post(instance.url, example, undefined, "wrong-code")).status,
+      403,
+    );
+    assert.equal(providerCalls, 0);
+    const unlock = await fetch(`${instance.url}/api/ai-access`, {
+      method: "POST",
+      headers: { "X-Viralify-AI-Access": code },
+    });
+    assert.equal(unlock.status, 200);
+    assert.equal(
+      (await post(instance.url, example, undefined, code)).status,
+      201,
+    );
+    assert.equal(providerCalls, 1);
+  } finally {
+    await instance.close();
+  }
+  const missingCode = await fixture({
+    stateless: true,
+    openaiApiKey: "test-only",
+    aiAccessCode: "",
+    fetcher: async () => {
+      throw new Error("must not call provider");
+    },
+  });
+  try {
+    const health = await (await fetch(`${missingCode.url}/api/health`)).json();
+    assert.equal(health.aiEnabled, false);
+    assert.equal((await post(missingCode.url)).status, 201);
+  } finally {
+    await missingCode.close();
   }
 });
 

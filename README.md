@@ -92,17 +92,18 @@ The app works without an API key. Locally, copy `.env.example` to `.env`, set `O
 Copy-Item .env.example .env
 ```
 
-| Variable                     | Default                     | Purpose                                                 |
-| ---------------------------- | --------------------------- | ------------------------------------------------------- |
-| `PORT`                       | `3001`                      | Local API/built-app port                                |
-| `HOST`                       | `127.0.0.1`                 | Local listen address                                    |
-| `OPENAI_API_KEY`             | Empty                       | Enables AI feedback and transcription                   |
-| `OPENAI_MODEL`               | `gpt-4.1-mini`              | Semantic review model                                   |
-| `OPENAI_TRANSCRIPTION_MODEL` | `gpt-4o-mini-transcribe`    | Speech transcription model                              |
-| `FFMPEG_PATH`                | Bundled executable          | Optional absolute FFmpeg path                           |
-| `ALLOWED_ORIGINS`            | Loopback/deployment origins | Comma-separated exact origins, for custom HTTPS domains |
+| Variable                     | Default                     | Purpose                                                                    |
+| ---------------------------- | --------------------------- | -------------------------------------------------------------------------- |
+| `PORT`                       | `3001`                      | Local API/built-app port                                                   |
+| `HOST`                       | `127.0.0.1`                 | Local listen address                                                       |
+| `OPENAI_API_KEY`             | Empty                       | Enables AI feedback and transcription                                      |
+| `AI_ACCESS_CODE`             | Empty                       | Required with the API key on the public deployment; unlocks private AI use |
+| `OPENAI_MODEL`               | `gpt-4.1-mini`              | Semantic review model                                                      |
+| `OPENAI_TRANSCRIPTION_MODEL` | `gpt-4o-mini-transcribe`    | Speech transcription model                                                 |
+| `FFMPEG_PATH`                | Bundled executable          | Optional absolute FFmpeg path                                              |
+| `ALLOWED_ORIGINS`            | Loopback/deployment origins | Comma-separated exact origins, for custom HTTPS domains                    |
 
-The key stays on the server. With AI enabled, text, context, measurements, images/video frames, and extracted audio may go to OpenAI. Usage charges and access depend on your API account. Never prefix secrets with `VITE_`.
+The API key and access code stay in server environment variables. On Vercel, AI stays off unless both are set. Enter the access code in profile settings; the browser keeps it for that session and sends it only to Viralify's API. Visitors without the code continue to get local analysis. With AI enabled, text, context, measurements, images/video frames, and extracted audio may go to OpenAI. Usage charges and access depend on your API account. Never prefix secrets with `VITE_`.
 
 Without a key, the server performs rule-based analysis without an AI provider. **On the hosted app, content still goes to the hosted server for processing.** AI supplements editorial feedback; numeric scores retain the transparent rubric. Provider failures fall back with an explicit limitation.
 
@@ -130,7 +131,7 @@ Secrets, `.vercel` linkage, dependencies, builds, and local data are excluded fr
 1. Import this repository. Use **Vite**, Node.js **22.x**, build command `npm run build`, and output directory `dist`. `vercel.json` supplies build and routing settings.
 2. Deploy without a key for the working rule-based version. No database is required.
 3. `api/index.ts` runs as a Node function with Linux FFmpeg and Sharp. `/api/*` routes to it; media processing uses temporary files.
-4. After adding access/spending controls, optional AI can be configured with server environment variables and a redeployment.
+4. To enable private AI, set `OPENAI_API_KEY` and a random `AI_ACCESS_CODE` of 32–128 characters in Vercel's server environment variables, then redeploy. Set an API project spend limit as a backstop. Keep both values private; do not put them in Git or `VITE_` variables.
 5. Check `/api/health`: expect `storageMode: "browser"`, `maxUploadBytes: 4000000`, and `mediaEnabled: true`. Analyze an example, reload, and check the library persists.
 
 For a custom domain not supplied by Vercel's environment, set its exact HTTPS origin in `ALLOWED_ORIGINS` and redeploy. Do not use a wildcard.

@@ -1,6 +1,6 @@
 import express, { type ErrorRequestHandler } from "express";
 import multer from "multer";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import { resolve, join } from "node:path";
 import { existsSync } from "node:fs";
 import { z } from "zod";
@@ -31,6 +31,7 @@ export interface AppOptions {
   dataDir?: string;
   distDir?: string;
   openaiApiKey?: string;
+  aiAccessCode?: string;
   model?: string;
   transcriptionModel?: string;
   ffmpegPath?: string | null;
@@ -54,6 +55,23 @@ export function createApp(options: AppOptions = {}) {
     process.env.OPENAI_API_KEY ??
     ""
   ).trim();
+  const aiAccessCode = (
+    options.aiAccessCode ??
+    process.env.AI_ACCESS_CODE ??
+    ""
+  ).trim();
+  // Public deployments must have both secrets before paid AI can run.
+  const validAiAccessCode =
+    aiAccessCode.length >= 32 && aiAccessCode.length <= 128;
+  const aiEnabled = Boolean(apiKey) && (!stateless || validAiAccessCode);
+  const aiAccessRequired = stateless && aiEnabled;
+  const hasAiAccess = (provided: string | undefined) => {
+    if (!aiAccessRequired) return aiEnabled;
+    if (!provided || provided.length > 128) return false;
+    const expected = createHash("sha256").update(aiAccessCode).digest();
+    const actual = createHash("sha256").update(provided).digest();
+    return timingSafeEqual(expected, actual);
+  };
   const model = options.model ?? process.env.OPENAI_MODEL ?? "gpt-4.1-mini";
   const ai: AiConfiguration = {
     apiKey,
@@ -65,11 +83,12 @@ export function createApp(options: AppOptions = {}) {
     fetcher: options.fetcher,
   };
   const capabilities: Capabilities = {
-    aiEnabled: Boolean(apiKey),
+    aiEnabled,
+    aiAccessRequired,
     mediaEnabled: Boolean(ffmpeg),
     maxUploadMb,
     maxUploadBytes,
-    model: apiKey ? model : null,
+    model: aiEnabled ? model : null,
     storageMode: stateless ? "browser" : "server",
   };
   const origins = new Set(
@@ -138,7 +157,10 @@ export function createApp(options: AppOptions = {}) {
         "Access-Control-Allow-Methods",
         "GET,POST,PATCH,DELETE,OPTIONS",
       );
-      response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      response.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, X-Viralify-AI-Access",
+      );
     }
     if (!allowed && !["GET", "HEAD"].includes(request.method))
       return next(
@@ -150,6 +172,13 @@ export function createApp(options: AppOptions = {}) {
   app.use(express.json({ limit: "200kb" }));
 
   app.get("/api/health", (_request, response) => response.json(capabilities));
+  app.post("/api/ai-access", (request, response) => {
+    if (!aiAccessRequired)
+      throw new HttpError(503, "Private AI access is not configured.");
+    if (!hasAiAccess(request.get("x-viralify-ai-access")))
+      throw new HttpError(403, "The AI access code is incorrect.");
+    response.json({ unlocked: true });
+  });
   if (stateless) {
     app.use("/api/analyses", (_request, _response, next) =>
       next(
@@ -218,6 +247,10 @@ export function createApp(options: AppOptions = {}) {
     upload.single("file"),
     async (request, response) => {
       response.locals.processingAnalysis = true;
+      const suppliedCode = request.get("x-viralify-ai-access");
+      if (suppliedCode && !hasAiAccess(suppliedCode))
+        throw new HttpError(403, "The AI access code is incorrect.");
+      const useAi = aiEnabled && hasAiAccess(suppliedCode);
       let raw: unknown;
       try {
         raw = JSON.parse(request.body?.input ?? "");
@@ -251,11 +284,11 @@ export function createApp(options: AppOptions = {}) {
             request.file,
             input.type,
             ffmpeg,
-            Boolean(apiKey),
+            useAi,
           );
           input.media = processed.metadata;
           limitations.push(...processed.limitations);
-          if (apiKey && processed.audio) {
+          if (useAi && processed.audio) {
             try {
               const transcript = await transcribeAudio(processed.audio, ai);
               if (transcript) input.media.transcript = transcript;
@@ -272,7 +305,7 @@ export function createApp(options: AppOptions = {}) {
         }
         let result = analyzeContent(input);
         result.limitations.push(...limitations);
-        if (apiKey) {
+        if (useAi) {
           try {
             result = await enhanceAnalysis(
               input,
@@ -392,11 +425,9 @@ export function createApp(options: AppOptions = {}) {
       return response
         .status(400)
         .json({ error: "The request contains invalid JSON." });
-    response
-      .status(500)
-      .json({
-        error: "The analysis could not be completed. Please try again.",
-      });
+    response.status(500).json({
+      error: "The analysis could not be completed. Please try again.",
+    });
   };
   app.use(errors);
   return app;

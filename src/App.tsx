@@ -119,6 +119,10 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [records, setRecords] = useState<AnalysisRecord[]>([]);
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
+  const [aiUnlocked, setAiUnlocked] = useState(false);
+  const [aiCode, setAiCode] = useState("");
+  const [aiAccessError, setAiAccessError] = useState("");
+  const [aiAccessBusy, setAiAccessBusy] = useState(false);
   const [connectionError, setConnectionError] = useState("");
   const [type, setType] = useState<ContentType>("text");
   const [text, setText] = useState("");
@@ -162,6 +166,15 @@ export default function App() {
     try {
       const [health, history] = await Promise.all([api.health(), api.list()]);
       setCapabilities(health);
+      if (health.aiAccessRequired) {
+        const unlocked = await api.checkAiAccess().catch(() => {
+          api.clearAiAccess();
+          return false;
+        });
+        setAiUnlocked(unlocked);
+      } else {
+        setAiUnlocked(Boolean(health.aiEnabled));
+      }
       setRecords(history);
       setConnectionError("");
     } catch (error) {
@@ -412,6 +425,32 @@ export default function App() {
       );
     }
   };
+  const unlockAi = async () => {
+    setAiAccessError("");
+    setAiAccessBusy(true);
+    try {
+      if (!(await api.checkAiAccess(aiCode.trim())))
+        throw new Error("Enter your AI access code.");
+      api.saveAiAccess(aiCode.trim());
+      setAiCode("");
+      setAiUnlocked(true);
+      notify("AI analysis unlocked for this browser session.");
+    } catch (error) {
+      setAiAccessError(
+        error instanceof Error
+          ? error.message
+          : "Could not unlock AI analysis.",
+      );
+    } finally {
+      setAiAccessBusy(false);
+    }
+  };
+  const lockAi = () => {
+    api.clearAiAccess();
+    setAiUnlocked(false);
+    notify("AI analysis locked.");
+  };
+  const aiReady = Boolean(capabilities?.aiEnabled && aiUnlocked);
   const pageTitle = navItems.find((n) => n.id === page)!.label;
   return (
     <div className="app-shell">
@@ -504,7 +543,9 @@ export default function App() {
             </button>
             <span className="breadcrumb-root">Workspace</span>
             <ChevronRight size={13} />
-            <span className={page === "analyzer" ? "topbar-wordmark" : undefined}>
+            <span
+              className={page === "analyzer" ? "topbar-wordmark" : undefined}
+            >
               {pageTitle}
             </span>
           </div>
@@ -514,13 +555,15 @@ export default function App() {
               onClick={() => setSettingsOpen(true)}
             >
               <i className={connectionError ? "offline" : ""} />
-              {capabilities?.aiEnabled
+              {aiReady
                 ? "AI connected"
                 : connectionError
                   ? "Connection issue"
-                  : capabilities?.storageMode === "browser"
-                    ? "Private browser library"
-                    : "Local workspace"}
+                  : capabilities?.aiAccessRequired
+                    ? "AI locked"
+                    : capabilities?.storageMode === "browser"
+                      ? "Private browser library"
+                      : "Local workspace"}
             </button>
             <span className="header-divider" />
             <button
@@ -557,13 +600,16 @@ export default function App() {
             <>
               <div className="page-title">
                 <div>
-                  <div className="eyebrow">THE CREATIVE INTELLIGENCE DESK / 001</div>
+                  <div className="eyebrow">
+                    THE CREATIVE INTELLIGENCE DESK / 001
+                  </div>
                   <h1>
                     Make it worth <em>the scroll</em>
                     <span className="title-dot">.</span>
                   </h1>
                   <p>
-                    A sharper second opinion for the content you’re about to publish.
+                    A sharper second opinion for the content you’re about to
+                    publish.
                   </p>
                 </div>
                 <button
@@ -585,17 +631,31 @@ export default function App() {
                     <br />
                     Cut through the noise.
                   </h2>
-                  <p>See what works, what gets lost, and what to change before you hit publish.</p>
+                  <p>
+                    See what works, what gets lost, and what to change before
+                    you hit publish.
+                  </p>
                   <button onClick={useExample} disabled={busy}>
                     Explore with a sample
                     <ArrowUpRight size={16} />
                   </button>
                 </div>
                 <div className="hero-art" aria-hidden="true">
-                  <div className="signal-rings"><span /><span /><span /><span /></div>
-                  <div className="signal-core">V<span>///</span></div>
-                  <div className="signal-coordinate coordinate-top">40° 42′ N &nbsp; / &nbsp; CREATIVE FREQUENCY</div>
-                  <div className="signal-coordinate coordinate-bottom">INPUT → INSIGHT → IMPACT</div>
+                  <div className="signal-rings">
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <div className="signal-core">
+                    V<span>///</span>
+                  </div>
+                  <div className="signal-coordinate coordinate-top">
+                    40° 42′ N &nbsp; / &nbsp; CREATIVE FREQUENCY
+                  </div>
+                  <div className="signal-coordinate coordinate-bottom">
+                    INPUT → INSIGHT → IMPACT
+                  </div>
                   <div className="signal-crosshair crosshair-a">+</div>
                   <div className="signal-crosshair crosshair-b">+</div>
                 </div>
@@ -609,7 +669,9 @@ export default function App() {
                   <div className="section-heading">
                     <div>
                       <h2>Start with the draft.</h2>
-                      <p>Drop in the work. We’ll help you see it differently.</p>
+                      <p>
+                        Drop in the work. We’ll help you see it differently.
+                      </p>
                     </div>
                     <span className="step-label">01 / INPUT</span>
                   </div>
@@ -702,7 +764,7 @@ export default function App() {
                     <div className="editor-footer">
                       <span>
                         <ShieldCheck size={13} />
-                        {capabilities?.aiEnabled
+                        {aiReady
                           ? "AI-assisted analysis enabled"
                           : capabilities?.storageMode === "browser"
                             ? "Private library · content sent for analysis"
@@ -813,9 +875,11 @@ export default function App() {
                   <p className="analyze-note">
                     {busy
                       ? "Media processing can take a moment. You can leave this tab open."
-                      : capabilities?.aiEnabled
+                      : aiReady
                         ? "Your content is sent to OpenAI for AI-assisted analysis."
-                        : "No API key needed. Clear signals, actionable next steps."}
+                        : capabilities?.aiAccessRequired
+                          ? "AI is locked. Enter your access code in settings to enable it."
+                          : "No API key needed. Clear signals, actionable next steps."}
                   </p>
                 </form>
                 <div className="analyzer-side">
@@ -979,18 +1043,65 @@ export default function App() {
                 </span>
                 <div>
                   <strong>
-                    {capabilities?.aiEnabled
-                      ? "AI is connected"
-                      : "Content analysis is ready"}
+                    {aiReady
+                      ? "AI analysis is unlocked"
+                      : capabilities?.aiAccessRequired
+                        ? "AI analysis is locked"
+                        : "Content analysis is ready"}
                   </strong>
                   <p>
-                    {capabilities?.aiEnabled
-                      ? `Model: ${capabilities.model}`
-                      : "Content and media signals, without an API key."}
+                    {aiReady
+                      ? `Model: ${capabilities?.model}`
+                      : capabilities?.aiAccessRequired
+                        ? "Enter your private access code to use AI feedback and transcription."
+                        : "Content and media signals, without an API key."}
                   </p>
                 </div>
                 <span className="status-dot" />
               </div>
+              {capabilities?.aiAccessRequired && !aiUnlocked && (
+                <div className="ai-access-controls">
+                  <label className="field-label" htmlFor="ai-access-code">
+                    AI access code
+                  </label>
+                  <div>
+                    <input
+                      className="text-input"
+                      id="ai-access-code"
+                      type="password"
+                      autoComplete="off"
+                      maxLength={128}
+                      value={aiCode}
+                      onChange={(event) => setAiCode(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          void unlockAi();
+                        }
+                      }}
+                    />
+                    <button
+                      className="button primary"
+                      type="button"
+                      disabled={aiAccessBusy || !aiCode.trim()}
+                      onClick={() => void unlockAi()}
+                    >
+                      Unlock AI
+                    </button>
+                  </div>
+                  {aiAccessError && <p role="alert">{aiAccessError}</p>}
+                  <p>The code is kept only for this browser session.</p>
+                </div>
+              )}
+              {capabilities?.aiAccessRequired && aiUnlocked && (
+                <button
+                  className="ai-lock-button"
+                  type="button"
+                  onClick={lockAi}
+                >
+                  Lock AI analysis
+                </button>
+              )}
               {!capabilities?.aiEnabled && (
                 <p>
                   For semantic image feedback and speech transcription,

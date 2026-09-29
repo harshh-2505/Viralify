@@ -2751,6 +2751,31 @@ main {
 .connection-settings > p {
   margin-top: 14px;
 }
+.ai-access-controls {
+  margin-top: 16px;
+}
+.ai-access-controls > div {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.ai-access-controls .text-input {
+  min-width: 0;
+  flex: 1;
+}
+.ai-access-controls .button {
+  white-space: nowrap;
+}
+.ai-lock-button {
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #5d784e;
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .connection-settings .status-dot {
   width: 6px;
   height: 6px;

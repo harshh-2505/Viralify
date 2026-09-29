@@ -6,6 +6,15 @@ import type {
 import { browserStore } from "./browser-store";
 import { uploadLimitBytes } from "./media";
 
+const accessStorageKey = "viralify.aiAccessCode";
+function storedAiCode(): string {
+  try {
+    return sessionStorage.getItem(accessStorageKey) || "";
+  } catch {
+    return "";
+  }
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options);
   if (!response.ok) {
@@ -40,6 +49,17 @@ function health(): Promise<Capabilities> {
 
 export const api = {
   health,
+  checkAiAccess: async (code = storedAiCode()) => {
+    if (!code) return false;
+    await request<{ unlocked: boolean }>("/api/ai-access", {
+      method: "POST",
+      headers: { "X-Viralify-AI-Access": code },
+    });
+    return true;
+  },
+  saveAiAccess: (code: string) =>
+    sessionStorage.setItem(accessStorageKey, code),
+  clearAiAccess: () => sessionStorage.removeItem(accessStorageKey),
   list: async () =>
     (await health()).storageMode === "browser"
       ? browserStore.list()
@@ -58,9 +78,11 @@ export const api = {
     const body = new FormData();
     body.append("input", JSON.stringify(input));
     if (file) body.append("file", file);
+    const aiCode = capabilities.aiAccessRequired ? storedAiCode() : "";
     const record = await request<AnalysisRecord>("/api/analyze", {
       method: "POST",
       body,
+      headers: aiCode ? { "X-Viralify-AI-Access": aiCode } : undefined,
     });
     return capabilities.storageMode === "browser"
       ? browserStore.add(record)
