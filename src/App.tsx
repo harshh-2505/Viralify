@@ -904,6 +904,7 @@ export default function App() {
                   <Results
                     record={record}
                     previousScore={previousScore}
+                    history={records}
                     onOptimize={(draft) => revise(record, draft)}
                     onSchedule={() => openSchedule(record)}
                     notify={notify}
@@ -1208,6 +1209,7 @@ export default function App() {
         >
           <Results
             record={viewRecord}
+            history={records}
             onOptimize={(draft) => revise(viewRecord, draft)}
             onSchedule={() => openSchedule(viewRecord)}
             notify={notify}

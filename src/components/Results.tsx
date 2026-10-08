@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -15,9 +15,17 @@ import {
   CalendarPlus,
   ChevronDown,
   Info,
+  GitBranch,
 } from "lucide-react";
 import type { AnalysisRecord, AnalysisResult } from "../../shared/types";
 import { downloadReport } from "../lib/utils";
+import {
+  ABOVE,
+  OUTCOME_TARGETS,
+  beatsBaseline,
+  buildOutcomeModel,
+  predictOutcome,
+} from "../../shared/outcome-model";
 
 export function Heatmap({
   publishing,
@@ -88,8 +96,10 @@ export default function Results({
   onSchedule,
   notify,
   previousScore,
+  history = [],
 }: {
   record: AnalysisRecord;
+  history?: AnalysisRecord[];
   onOptimize: (text: string) => void;
   onSchedule: () => void;
   notify: (text: string) => void;
@@ -100,6 +110,16 @@ export default function Results({
   );
   const [details, setDetails] = useState(false);
   const r = record.result;
+  // Views for reach goals, engagement rate otherwise; never train on this post's own result.
+  const target = record.input.goal === "reach" ? "views" : "engagement";
+  const pattern = useMemo(() => {
+    const state = buildOutcomeModel(
+      history.filter((h) => h.id !== record.id),
+      target,
+    );
+    if (state.status !== "ready" || !beatsBaseline(state.result)) return null;
+    return { outcome: state.result, prediction: predictOutcome(state.result, record) };
+  }, [history, record, target]);
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -183,6 +203,29 @@ export default function Results({
           )}
         </div>
       </div>
+      {pattern && (
+        <aside className={`cart-callout ${pattern.prediction.label === ABOVE ? "up" : "down"}`}>
+          <GitBranch size={18} />
+          <div>
+            <strong>
+              Your decision tree:{" "}
+              {pattern.prediction.label === ABOVE
+                ? `similar posts usually beat your median ${OUTCOME_TARGETS[target].short}`
+                : `similar posts usually landed at or below your median ${OUTCOME_TARGETS[target].short}`}
+            </strong>
+            <p>
+              {pattern.prediction.path.length
+                ? `Matched rule: ${pattern.prediction.path.map((c) => c.text).join(" → ")}. `
+                : ""}
+              {Math.round(pattern.prediction.support * 100)}% of the{" "}
+              {pattern.prediction.leafSize} past posts in this branch agree. Learned
+              from {pattern.outcome.trainedOn} of your logged posts; cross-validated
+              accuracy {Math.round((pattern.outcome.model.validation?.accuracy ?? 0) * 100)}%.
+              {!record.scheduledAt && " No posting time is set yet, so time-based splits follow the more common branch."}
+            </p>
+          </div>
+        </aside>
+      )}
       <div className="report-tabs" role="tablist" aria-label="Report sections">
         {(["overview", "improvements", "publishing"] as const).map((t) => (
           <button

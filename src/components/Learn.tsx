@@ -10,6 +10,7 @@ import {
   Target,
 } from "lucide-react";
 import type { AnalysisRecord } from "../../shared/types";
+import PatternFinder from "./PatternFinder";
 
 export default function Learn({
   records,
@@ -133,6 +134,7 @@ export default function Learn({
           format, and observation period.
         </p>
       </section>
+      <PatternFinder records={records} />
       <div className="learning-cards">
         <article className="panel">
           <span className="learning-icon">

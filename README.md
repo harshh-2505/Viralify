@@ -8,7 +8,7 @@ Viralify reviews **text, images, audio, and video before publishing**. Give it a
 
 It turns “Will this go viral?” into a practical editing loop: **analyze → improve → plan → publish → learn**. You get an explainable readiness score, prioritized suggestions, alternative hooks, a revised draft, publishing-time experiments, and a place to track real results.
 
-**The score is a heuristic content assessment, not a probability of going viral.** There is no trained virality model, live trend feed, or connected audience analytics. Optional AI adds semantic feedback; it does not make reach predictable.
+**The score is a heuristic content assessment, not a probability of going viral.** There is no trained virality model, live trend feed, or connected audience analytics; the only trained model is a per-creator decision tree over your own logged results. Optional AI adds semantic feedback; it does not make reach predictable.
 
 [Source code](https://github.com/harshh-2505/Viralify) · [Methodology](docs/methodology.md) · [API reference](docs/api.md)
 
@@ -22,6 +22,7 @@ The live app is hosted on Vercel and automatically deploys updates to `main`. It
 - **Publishing planner:** Offers a seven-day heatmap and three two-hour windows to test in your audience's timezone. Save a future date and export an `.ics` calendar event. Missing or ambiguous daylight-saving times are rejected.
 - **Content library:** Saves reports, supports search and type filters, opens earlier analyses, and exports complete Markdown reports.
 - **Learning loop:** Records actual views, likes, comments, shares, and saves. Engagement is interactions divided by views, not unique people reached.
+- **Decision tree (CART):** After 10 posts have logged results, trains a pruned classification tree in the browser that shows which pre-publishing choices separated your above-median posts from the rest, with cross-validated accuracy against a guessing baseline. New reports show the matching rule when the tree beats that baseline. A synthetic-data preview demonstrates it before real results exist. See [methodology](docs/methodology.md#decision-tree-on-your-own-outcomes-cart).
 
 Media without a caption or transcript receives a **technical-only assessment**. Unavailable wording dimensions are marked “Not assessed” and excluded. This score is not directly comparable with a full content assessment.
 

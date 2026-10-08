@@ -2,7 +2,7 @@
 
 Viralify helps creators find useful edits and run publishing experiments. It does not determine whether a post will go viral. The displayed score is a product-defined readiness measure derived from a fixed rubric and the evidence available in the submitted content.
 
-There is no training set of viral posts, fitted reach model, probability calibration, live trend crawler, follower graph, or platform analytics connection in this version. No expected-view count or guaranteed reach uplift is inferred from the score. A high score means the content satisfies more of the implemented checks; it cannot establish audience demand or future distribution.
+There is no training set of viral posts, fitted reach model, probability calibration, live trend crawler, follower graph, or platform analytics connection in this version. The only trained model is the per-creator decision tree in the learning view, described below, and it does not change the readiness score. No expected-view count or guaranteed reach uplift is inferred from the score. A high score means the content satisfies more of the implemented checks; it cannot establish audience demand or future distribution.
 
 ## Evidence used
 
@@ -55,4 +55,44 @@ The learning view calculates engagement as `(likes + comments + shares + saves) 
 
 For a timing experiment, keep the content format and audience as similar as practical, vary the publishing window, and repeat the comparison. For a content experiment, change a specific element such as the opening hook. A single better-performing post does not isolate the cause: topic, audience size, distribution, and external events may also have changed.
 
-Manually entered outcomes are saved for the creator's review. They do not automatically retrain the scoring rubric or personalize the publishing heatmap. Predictive modeling would require a consented historical dataset, clear outcome definitions, account-aware baselines, time-based validation, calibration, and monitoring for drift before its numbers could be described as probabilities.
+Manually entered outcomes do not retrain the scoring rubric or personalize the publishing heatmap. They do feed the decision tree described next.
+
+## Decision tree on your own outcomes (CART)
+
+Once results are logged for at least 10 posts, the learning view trains a classification tree with CART (Classification and Regression Trees; Breiman, Friedman, Olshen and Stone, 1984). The implementation is in [`shared/cart.ts`](../shared/cart.ts) and runs in the browser on the records stored there. No outcome data is sent to the server.
+
+**Label.** Each logged post is labelled *above* or *at or below* the creator's own median for the chosen outcome: engagement rate as defined above, or views. Comparing against the creator's own median keeps the model about one account's history rather than an absolute "viral" threshold.
+
+**Features.** Only information available before publishing is used (see [`shared/outcome-model.ts`](../shared/outcome-model.ts)):
+
+| Feature | Kind |
+| --- | --- |
+| Readiness score and the six signal scores | Numeric; a signal marked "not assessed" is treated as missing |
+| Word count, media duration | Numeric |
+| Platform, format, goal | Categorical |
+| Planned posting day and hour, in the audience timezone | Categorical / numeric; missing when no time was scheduled |
+
+**Training.**
+- Each split is the binary partition with the largest decrease in Gini impurity.
+- Numeric features are split at midpoints between observed values.
+- Categorical features are split using Breiman's ordering by class share, which gives the optimal two-group partition for a two-class label.
+- Missing values follow the branch that received more training posts.
+- The tree is grown to a maximum depth of 3 (4 once 40 or more posts are logged), with at least 2 posts per leaf (3 from 40 posts).
+- It is then pruned with minimal cost-complexity pruning. The pruning strength is selected by stratified 5-fold cross-validation with the one-standard-error rule, which picks the simplest tree whose error is within one standard error of the best.
+
+**What is shown.**
+- The pruned tree as if–then rules.
+- Each leaf's share of posts above the median.
+- Feature importance: each feature's share of the tree's total Gini decrease.
+- The cross-validated accuracy next to the accuracy of always guessing the more common label.
+
+When the tree does not beat that baseline, the interface says so. A new report shows the matching rule only when the tree does beat the baseline, and the post being viewed is excluded from training.
+
+**Limits.**
+- With tens of posts, the accuracy estimate is noisy. It is also slightly optimistic, because the same folds choose the pruning level.
+- Splits show association within one creator's history, not cause. Topic, audience growth, platform distribution changes and observation windows all influence outcomes too.
+- Posts scheduled outside Viralify have no posting time, so time-based splits route them by the majority branch.
+
+A "Preview with synthetic data" option trains the same algorithm on 48 generated posts with planted patterns, so the method can be demonstrated before real data exists. It is labelled as synthetic and never saved.
+
+Treating the tree's output as a probability would need much more: a consented, larger historical dataset, account-aware baselines, time-based validation, calibration, and monitoring for drift.
