@@ -1,32 +1,107 @@
+<div align="center">
+
+<img src="public/favicon.svg" alt="Viralify logo" width="72" height="72" />
+
 # Viralify
 
-**Make it worth the scroll.** Understand your content, improve your next draft, and find a publishing window worth testing.
+### Make it worth the scroll.
 
-**[Open Viralify on Vercel →](https://viralify-gamma.vercel.app/)**
+Understand your content, improve your next draft, and find a publishing window worth testing.
+
+[![Live on Vercel](https://img.shields.io/badge/Live%20demo-viralify--gamma.vercel.app-141b1c?style=for-the-badge&logo=vercel&logoColor=white)](https://viralify-gamma.vercel.app/)
+[![CI](https://img.shields.io/github/actions/workflow/status/harshh-2505/Viralify/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/harshh-2505/Viralify/actions/workflows/ci.yml)
+
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22-5FA04E?logo=nodedotjs&logoColor=white)
+![FFmpeg](https://img.shields.io/badge/FFmpeg-media-007808?logo=ffmpeg&logoColor=white)
+
+[**Open the app**](https://viralify-gamma.vercel.app/) · [Methodology](docs/methodology.md) · [API reference](docs/api.md) · [Run locally](#run-locally)
+
+<br />
+
+<img src="docs/screenshots/analyzer.png" alt="Viralify analyzer home screen with the 'Make it worth the scroll' hero and the draft input" width="100%" />
+
+</div>
+
+---
 
 Viralify reviews **text, images, audio, and video before publishing**. Give it a draft or upload, choose a platform and audience, and it explains which content signals are strong, what needs work, and what to try next.
 
-It turns “Will this go viral?” into a practical editing loop: **analyze → improve → plan → publish → learn**. You get an explainable readiness score, prioritized suggestions, alternative hooks, a revised draft, publishing-time experiments, and a place to track real results.
+It turns “Will this go viral?” into a practical editing loop:
 
-**The score is a heuristic content assessment, not a probability of going viral.** There is no trained virality model, live trend feed, or connected audience analytics; the only trained model is a per-creator decision tree over your own logged results. Optional AI adds semantic feedback; it does not make reach predictable.
+<p align="center"><b>analyze</b> → <b>improve</b> → <b>plan</b> → <b>publish</b> → <b>learn</b></p>
 
-[Source code](https://github.com/harshh-2505/Viralify) · [Methodology](docs/methodology.md) · [API reference](docs/api.md)
+You get an explainable readiness score, prioritized suggestions, alternative hooks, a revised draft, publishing-time experiments, and a place to track real results.
 
-The live app is hosted on Vercel and automatically deploys updates to `main`. It currently runs without an AI API key: text heuristics and real media inspection work immediately, with reports kept in your browser. Hosted uploads are limited to 4 MB per file.
+> [!IMPORTANT]
+> **The score is a heuristic content assessment, not a probability of going viral.** There is no trained virality model, live trend feed, or connected audience analytics; the only trained model is a per-creator decision tree over your own logged results. Optional AI adds semantic feedback; it does not make reach predictable.
+
+> [!NOTE]
+> The live app is hosted on Vercel and automatically deploys updates to `main`. It currently runs without an AI API key: text heuristics and real media inspection work immediately, with reports kept in your browser. Hosted uploads are limited to 4 MB per file.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/results.png" alt="Analysis report showing a 71/100 readiness score and six weighted signal scores" />
+      <p align="center"><b>Explainable readiness score</b><br /><sub>Six weighted signals, each with its evidence.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/improvements.png" alt="Improvements tab with a high-priority suggestion and a revised draft" />
+      <p align="center"><b>Optimization feedback</b><br /><sub>Prioritized edits and a revised draft to reanalyze.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/timing.png" alt="Seven-day publishing heatmap with three suggested test windows" />
+      <p align="center"><b>Publishing windows</b><br /><sub>A seven-day heatmap and three windows to test.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/planner.png" alt="Publishing planner week view with a scheduled post" />
+      <p align="center"><b>Publishing planner</b><br /><sub>Schedule drafts and export an <code>.ics</code> calendar.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/library.png" alt="Content library listing saved analyses with readiness and status" />
+      <p align="center"><b>Content library</b><br /><sub>Search, filter, reopen, and export reports.</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/learn.png" alt="Learning loop with totals for views, likes, comments, shares, and saves" />
+      <p align="center"><b>Learning loop</b><br /><sub>Log real results after publishing.</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/decision-tree.png" alt="CART decision tree preview trained on synthetic posts, splitting on opening hook score" />
+      <p align="center"><b>CART decision tree</b><br /><sub>Shown here with the built-in synthetic-data preview.</sub></p>
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="docs/screenshots/mobile.png" alt="Viralify home screen on a phone" width="58%" />
+      <p align="center"><b>Responsive</b><br /><sub>The full workspace works on a phone.</sub></p>
+    </td>
+  </tr>
+</table>
 
 ## What the project does
 
-- **Content analyzer:** Assesses opening-hook wording, clarity, useful-detail signals, calls to action, platform fit, and copy/media readiness. Each dimension shows its evidence and weight.
-- **Optimization feedback:** Provides specific edits, examples, alternative hooks, and a revised draft you can apply and reanalyze. Revisions are saved separately for comparison.
-- **Multimodal inspection:** Decodes actual files with Sharp and FFmpeg. Optional AI adds image/frame interpretation and speech transcription.
-- **Publishing planner:** Offers a seven-day heatmap and three two-hour windows to test in your audience's timezone. Save a future date and export an `.ics` calendar event. Missing or ambiguous daylight-saving times are rejected.
-- **Content library:** Saves reports, supports search and type filters, opens earlier analyses, and exports complete Markdown reports.
-- **Learning loop:** Records actual views, likes, comments, shares, and saves. Engagement is interactions divided by views, not unique people reached.
-- **Decision tree (CART):** After 10 posts have logged results, trains a pruned classification tree in the browser that shows which pre-publishing choices separated your above-median posts from the rest, with cross-validated accuracy against a guessing baseline. New reports show the matching rule when the tree beats that baseline. A synthetic-data preview demonstrates it before real results exist. See [methodology](docs/methodology.md#decision-tree-on-your-own-outcomes-cart).
+|     | Feature                   | What you get                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :-: | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔍  | **Content analyzer**      | Assesses opening-hook wording, clarity, useful-detail signals, calls to action, platform fit, and copy/media readiness. Each dimension shows its evidence and weight.                                                                                                                                                                                                                                                                                                |
+| ✍️  | **Optimization feedback** | Specific edits, examples, alternative hooks, and a revised draft you can apply and reanalyze. Revisions are saved separately for comparison.                                                                                                                                                                                                                                                                                                                         |
+| 🎞️  | **Multimodal inspection** | Decodes actual files with Sharp and FFmpeg. Optional AI adds image/frame interpretation and speech transcription.                                                                                                                                                                                                                                                                                                                                                    |
+| 🗓️  | **Publishing planner**    | A seven-day heatmap and three two-hour windows to test in your audience's timezone. Save a future date and export an `.ics` calendar event. Missing or ambiguous daylight-saving times are rejected.                                                                                                                                                                                                                                                                 |
+| 📚  | **Content library**       | Saves reports, supports search and type filters, opens earlier analyses, and exports complete Markdown reports.                                                                                                                                                                                                                                                                                                                                                      |
+| 📈  | **Learning loop**         | Records actual views, likes, comments, shares, and saves. Engagement is interactions divided by views, not unique people reached.                                                                                                                                                                                                                                                                                                                                    |
+| 🌳  | **Decision tree (CART)**  | After 10 posts have logged results, trains a pruned classification tree in the browser that shows which pre-publishing choices separated your above-median posts from the rest, with cross-validated accuracy against a guessing baseline. New reports show the matching rule when the tree beats that baseline. A synthetic-data preview demonstrates it before real results exist. See [methodology](docs/methodology.md#decision-tree-on-your-own-outcomes-cart). |
 
 Media without a caption or transcript receives a **technical-only assessment**. Unavailable wording dimensions are marked “Not assessed” and excluded. This score is not directly comparable with a full content assessment.
 
-Platform profiles: Instagram, TikTok, YouTube, LinkedIn, and X. These are editorial starting points, not reverse-engineered recommendation algorithms.
+**Platform profiles:** Instagram, TikTok, YouTube, LinkedIn, and X. These are editorial starting points, not reverse-engineered recommendation algorithms.
 
 ## Run locally
 
@@ -58,12 +133,12 @@ Installation includes Sharp and a platform-specific FFmpeg executable. If the FF
 
 ## Typical workflow
 
-1. Paste a draft or select a file. Add a caption or transcript for context.
-2. Choose your platform, objective, audience, and audience timezone.
-3. Analyze and review the highest-priority improvements.
-4. Adapt suggested wording to your voice, verify factual claims, and analyze the revision.
-5. Save a publishing date, export your calendar, and publish on the platform yourself.
-6. After a consistent observation period, such as seven days, log real results and compare similar posts.
+1. **Draft.** Paste a draft or select a file. Add a caption or transcript for context.
+2. **Target.** Choose your platform, objective, audience, and audience timezone.
+3. **Analyze.** Review the highest-priority improvements.
+4. **Revise.** Adapt suggested wording to your voice, verify factual claims, and analyze the revision.
+5. **Plan.** Save a publishing date, export your calendar, and publish on the platform yourself.
+6. **Learn.** After a consistent observation period, such as seven days, log real results and compare similar posts.
 
 Viralify does **not** publish posts, send reminders, or connect to social accounts. Its calendar is a plan you can export to a calendar application. Outcomes are entered manually. Preferences use browser `localStorage`.
 
